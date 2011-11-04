@@ -12,7 +12,7 @@ setup(
     maintainer_email='mbp@canonical.com',
     url='https://launchpad.net/txfixtures',
     description=('Treat Twisted applications as Python test fixtures'),
-    version='0.1.1',
+    version='0.1.2',
     classifiers=["License :: OSI Approved :: GNU General Public License (GPL)"],
     packages=['txfixtures'],
     requires=[

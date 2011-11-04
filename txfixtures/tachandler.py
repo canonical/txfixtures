@@ -6,8 +6,8 @@
 __metaclass__ = type
 
 __all__ = [
-    'TacTestSetup',
     'TacException',
+    'TacTestFixture',
     ]
 
 
@@ -37,7 +37,7 @@ class TacException(Exception):
     """Error raised by TacTestSetup."""
 
 
-class TacTestSetup(Fixture):
+class TacTestFixture(Fixture):
     """Setup an TAC file as daemon for use by functional tests.
 
     You must override setUpRoot to set up a root directory for the daemon.
@@ -46,7 +46,13 @@ class TacTestSetup(Fixture):
     tell how long to wait before the daemon is available.
     """
 
-    def setUp(self, spew=False, umask=None):
+    def setUp(self, spew=False, umask=None, python_path=None, twistd_script=None):
+        """Initialize a new TacTestFixture fixture.
+
+        :param python_path: If set, run twistd under this Python interpreter.
+        :param twistd_script: If set, run this twistd script rather than the 
+            system default.  Must be provided if python_path is given.
+        """
         Fixture.setUp(self)
         if get_pid_from_file(self.pidfile):
             # An attempt to run while there was an existing live helper
@@ -71,8 +77,17 @@ class TacTestSetup(Fixture):
                     "Could not kill stale process %s." % (self.pidfile,))
 
         self.setUpRoot()
-        args = [twistd_script, '-o', '-y', self.tacfile,
-                '--pidfile', self.pidfile, '--logfile', self.logfile]
+        if python_path:
+            if twistd_script is None:
+                raise ValueError("python_path specified but not twistd location")
+            args = [python_path, twistd_script]
+        else:
+            if twistd_script is None:
+                twistd_script = 'twistd'
+            args = [twistd_script]
+        args.extend([
+            '-o', '-y', self.tacfile, '--pidfile', self.pidfile,
+            '--logfile', self.logfile])
         if spew:
             args.append('--spew')
         if umask is not None:

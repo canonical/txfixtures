@@ -23,14 +23,14 @@ from testtools.matchers import (
 
 from ..tachandler import (
     TacException,
-    TacTestSetup,
+    TacTestFixture,
     )
 from ..osutils import (
     get_pid_from_file,
     )
 
 
-class SimpleTac(TacTestSetup):
+class SimpleTac(TacTestFixture):
 
     def __init__(self, name, tempdir, port):
         super(SimpleTac, self).__init__()
@@ -62,7 +62,7 @@ class SimpleTac(TacTestSetup):
 
 
 class IsRunning(Matcher):
-    """Ensures the `TacTestSetup`'s process is running."""
+    """Ensures the `TacTestFixture`'s process is running."""
 
     def match(self, fixture):
         pid = get_pid_from_file(fixture.pidfile)
@@ -73,11 +73,11 @@ class IsRunning(Matcher):
         return self.__class__.__name__
 
 
-class TacTestSetupTestCase(testtools.TestCase):
-    """Some tests for the error handling of TacTestSetup."""
+class TacTestFixtureTestCase(testtools.TestCase):
+    """Some tests for the error handling of TacTestFixture."""
 
     def test_okay(self):
-        """TacTestSetup sets up and runs a simple service."""
+        """TacTestFixture sets up and runs a simple service."""
         tempdir = self.useFixture(TempDir()).path
         fixture = SimpleTac("okay", tempdir, 9876)
 
@@ -91,7 +91,7 @@ class TacTestSetupTestCase(testtools.TestCase):
         self.assertEqual([], warnings_log)
 
     def test_missingTac(self):
-        """TacTestSetup raises TacException if the tacfile doesn't exist"""
+        """TacTestFixture raises TacException if the tacfile doesn't exist"""
         fixture = SimpleTac("missing", "/file/does/not/exist", 0)
         try:
             self.assertRaises(TacException, fixture.setUp)
@@ -101,7 +101,7 @@ class TacTestSetupTestCase(testtools.TestCase):
 
     def test_couldNotListenTac(self):
         """If the tac fails due to not being able to listen on the needed
-        port, TacTestSetup will fail.
+        port, TacTestFixture will fail.
         """
         tempdir = self.useFixture(TempDir()).path
         fixture = SimpleTac("cannotlisten", tempdir, 1)
@@ -112,7 +112,7 @@ class TacTestSetupTestCase(testtools.TestCase):
             fixture.cleanUp()
 
     def test_stalePidFile(self):
-        """TacTestSetup complains about stale pid files."""
+        """TacTestFixture complains about stale pid files."""
         tempdir = self.useFixture(TempDir()).path
         fixture = SimpleTac("okay", tempdir, 9876)
 
