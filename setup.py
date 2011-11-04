@@ -13,6 +13,6 @@ setup(
     url='https://launchpad.net/txfixtures',
     description=('Treat Twisted applications as Python test fixtures'),
     version='0.1',
-    classifiers=["License :: OSI Approved :: GNU GPL v3"],
+    classifiers=["License :: OSI Approved :: GNU General Public License (GPL)"],
     packages=['txfixtures'],
     )
