@@ -21,7 +21,7 @@ import warnings
 
 from fixtures import Fixture
 
-from .osutils import (
+from txfixtures.osutils import (
     get_pid_from_file,
     kill_by_pidfile,
     two_stage_kill,

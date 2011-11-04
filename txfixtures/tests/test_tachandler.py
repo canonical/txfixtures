@@ -21,11 +21,11 @@ from testtools.matchers import (
     Not,
     )
 
-from ..tachandler import (
+from txfixtures.tachandler import (
     TacException,
     TacTestFixture,
     )
-from ..osutils import (
+from txfixtures.osutils import (
     get_pid_from_file,
     )
 
