@@ -29,10 +29,6 @@ from txfixtures.osutils import (
     )
 
 
-# Can be overridden to specify path, etc.
-twistd_script = 'twistd'
-
-
 class TacException(Exception):
     """Error raised by TacTestSetup."""
 
