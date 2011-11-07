@@ -68,22 +68,22 @@ class TacTestFixture(Fixture):
             # machine was hard-rebooted and the pid file was not cleaned up
             # (bug again). In other words, it's not safe to assume that a
             # stale pid file is safe to delete without human intervention.
-            if get_pid_from_file(self.pidfile):
+            stale_pid = get_pid_from_file(self.pidfile)
+            if stale_pid:
                 raise TacException(
-                    "Could not kill stale process %s." % (self.pidfile,))
+                    "Could not kill stale process %s from %s." % (
+                        stale_pid, self.pidfile,))
 
         self.setUpRoot()
         if python_path is None:
             python_path = sys.executable
-        args = [python_path, 
-            '-Wignore::DeprecationWarning']
         if twistd_script is None:
-            args.extend('-m', 'twisted.scripts.twistd')
-        else:
-            args.append(twistd_script)
-        args.extend([
+            twistd_script = '/usr/bin/twistd'
+        args = [python_path, 
+            '-Wignore::DeprecationWarning',
+            twistd_script,
             '-o', '-y', self.tacfile, '--pidfile', self.pidfile,
-            '--logfile', self.logfile])
+            '--logfile', self.logfile]
         if spew:
             args.append('--spew')
         if umask is not None:
@@ -107,6 +107,8 @@ class TacTestFixture(Fixture):
             raise TacException('Error running %s: unclean stdout/err: %s'
                                % (args, stdout))
         rv = proc.wait()
+        # twistd will normally fork off into the background with the
+        # originally-spawned process exiting 0.
         if rv != 0:
             raise TacException('Error %d running %s' % (rv, args))
 
