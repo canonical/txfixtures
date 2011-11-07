@@ -73,14 +73,14 @@ class TacTestFixture(Fixture):
                     "Could not kill stale process %s." % (self.pidfile,))
 
         self.setUpRoot()
-        if python_path:
-            if twistd_script is None:
-                raise ValueError("python_path specified but not twistd location")
-            args = [python_path, twistd_script]
+        if python_path is None:
+            python_path = sys.executable
+        args = [python_path, 
+            '-Wignore::DeprecationWarning']
+        if twistd_script is None:
+            args.extend('-m', 'twisted.scripts.twistd')
         else:
-            if twistd_script is None:
-                twistd_script = 'twistd'
-            args = [twistd_script]
+            args.append(twistd_script)
         args.extend([
             '-o', '-y', self.tacfile, '--pidfile', self.pidfile,
             '--logfile', self.logfile])
@@ -93,8 +93,6 @@ class TacTestFixture(Fixture):
         # in Twisted are not our problem.  They also aren't easy to suppress,
         # and cause test failures due to spurious stderr output.  Just shut
         # the whole bloody mess up.
-        subprocess_env = dict(os.environ)
-        subprocess_env['PYTHONWARNINGS'] = 'ignore::DeprecationWarning'
 
         # Run twistd, and raise an error if the return value is non-zero or
         # stdout/stderr are written to.
@@ -102,7 +100,7 @@ class TacTestFixture(Fixture):
             args,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            env=subprocess_env)
+            )
         self.addCleanup(self.killTac)
         stdout = until_no_eintr(10, proc.stdout.read)
         if stdout:
