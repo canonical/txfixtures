@@ -28,7 +28,9 @@ setup(
     description=('Treat Twisted applications as Python test fixtures'),
     long_description=get_long_description(),
     version=get_version(),
-    classifiers=["License :: OSI Approved :: GNU General Public License (GPL)"],
+    classifiers=[
+        "License :: OSI Approved :: GNU General Public License (GPL)",
+        ],
     packages=['txfixtures'],
     requires=[
         'fixtures',

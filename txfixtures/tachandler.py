@@ -38,15 +38,16 @@ class TacTestFixture(Fixture):
 
     You must override setUpRoot to set up a root directory for the daemon.
 
-    You may override _hasDaemonStarted, typically by calling _isPortListening, to 
-    tell how long to wait before the daemon is available.
+    You may override _hasDaemonStarted, typically by calling _isPortListening,
+    to tell how long to wait before the daemon is available.
     """
 
-    def setUp(self, spew=False, umask=None, python_path=None, twistd_script=None):
+    def setUp(self, spew=False, umask=None,
+              python_path=None, twistd_script=None):
         """Initialize a new TacTestFixture fixture.
 
         :param python_path: If set, run twistd under this Python interpreter.
-        :param twistd_script: If set, run this twistd script rather than the 
+        :param twistd_script: If set, run this twistd script rather than the
             system default.  Must be provided if python_path is given.
         """
         Fixture.setUp(self)
@@ -79,7 +80,7 @@ class TacTestFixture(Fixture):
             python_path = sys.executable
         if twistd_script is None:
             twistd_script = '/usr/bin/twistd'
-        args = [python_path, 
+        args = [python_path,
             '-Wignore::DeprecationWarning',
             twistd_script,
             '-o', '-y', self.tacfile, '--pidfile', self.pidfile,
