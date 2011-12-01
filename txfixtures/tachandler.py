@@ -202,18 +202,3 @@ class TacTestFixture(Fixture):
     @property
     def daemon_port(self):
         raise NotImplementedError
-
-def get_pid_from_file(pidfile_path):
-    """Retrieve the PID from the given file, if it exists, None otherwise."""
-    if not os.path.exists(pidfile_path):
-        return None
-    # Get the pid.
-    pid = open(pidfile_path, 'r').read().split()[0]
-    try:
-        pid = int(pid)
-    except ValueError:
-        # pidfile contains rubbish
-        return None
-    return pid
-
-
