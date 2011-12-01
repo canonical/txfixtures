@@ -51,7 +51,7 @@ class TacTestFixture(Fixture):
         :param twistd_script: If set, run this twistd script rather than the
             system default.  Must be provided if python_path is given.
         """
-        Fixture.setUp(self)
+        super(TacTestFixture, self).setUp()
         if get_pid_from_file(self.pidfile):
             # An attempt to run while there was an existing live helper
             # was made. Note that this races with helpers which use unique
