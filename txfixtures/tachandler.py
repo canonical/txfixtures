@@ -21,6 +21,7 @@ import warnings
 
 from fixtures import Fixture
 
+from testtools.content import content_from_file
 from txfixtures.osutils import (
     get_pid_from_file,
     kill_by_pidfile,
@@ -113,6 +114,7 @@ class TacTestFixture(Fixture):
         if rv != 0:
             raise TacException('Error %d running %s' % (rv, args))
 
+        self.addDetail(self.logfile, content_from_file(self.logfile))
         self._waitForDaemonStartup()
 
     def _hasDaemonStarted(self):
@@ -156,8 +158,7 @@ class TacTestFixture(Fixture):
             now = time.time()
 
         if now >= deadline:
-            raise TacException('Unable to start %s. Content of %s:\n%s' % (
-                self.tacfile, self.logfile, open(self.logfile).read()))
+            raise TacException('Unable to start %s.' % self.tacfile)
 
     def tearDown(self):
         # For compatibility - migrate to cleanUp.
