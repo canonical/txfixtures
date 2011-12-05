@@ -21,6 +21,7 @@ import warnings
 
 from fixtures import Fixture
 
+from testtools.content import content_from_file
 from txfixtures.osutils import (
     get_pid_from_file,
     kill_by_pidfile,
@@ -50,7 +51,7 @@ class TacTestFixture(Fixture):
         :param twistd_script: If set, run this twistd script rather than the
             system default.  Must be provided if python_path is given.
         """
-        Fixture.setUp(self)
+        super(TacTestFixture, self).setUp()
         if get_pid_from_file(self.pidfile):
             # An attempt to run while there was an existing live helper
             # was made. Note that this races with helpers which use unique
@@ -113,6 +114,7 @@ class TacTestFixture(Fixture):
         if rv != 0:
             raise TacException('Error %d running %s' % (rv, args))
 
+        self.addDetail(self.logfile, content_from_file(self.logfile))
         self._waitForDaemonStartup()
 
     def _hasDaemonStarted(self):
@@ -156,8 +158,7 @@ class TacTestFixture(Fixture):
             now = time.time()
 
         if now >= deadline:
-            raise TacException('Unable to start %s. Content of %s:\n%s' % (
-                self.tacfile, self.logfile, open(self.logfile).read()))
+            raise TacException('Unable to start %s.' % self.tacfile)
 
     def tearDown(self):
         # For compatibility - migrate to cleanUp.
