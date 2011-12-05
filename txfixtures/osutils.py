@@ -8,7 +8,6 @@
 import errno
 import os
 import os.path
-import shutil
 from signal import (
     SIGKILL,
     SIGTERM,
@@ -73,7 +72,6 @@ def two_stage_kill(pid, poll_interval=0.1, num_polls=50):
     _kill_may_race(pid, SIGKILL)
 
 
-
 def kill_by_pidfile(pidfile_path, poll_interval=0.1, num_polls=50):
     """Kill a process identified by the pid stored in a file.
 
@@ -124,5 +122,3 @@ def until_no_eintr(retries, function, *args, **kwargs):
             raise
     else:
         raise
-
-
