@@ -5,6 +5,8 @@
 
 __metaclass__ = type
 
+import os
+
 from os.path import (
     dirname,
     exists,
@@ -21,6 +23,10 @@ from testtools.matchers import (
     Not,
     )
 
+from twisted.scripts import twistd
+
+from retrying import retry
+
 from txfixtures.tachandler import (
     TacException,
     TacTestFixture,
@@ -36,6 +42,12 @@ class SimpleTac(TacTestFixture):
         super(SimpleTac, self).__init__()
         self.name, self.tempdir = name, tempdir
         self.port = port
+
+    def setUp(self):
+        # The TWISTD_SCRIPT environment variable gets typically
+        # set by tox (see tox.ini).
+        super(SimpleTac, self).setUp(
+            twistd_script=os.environ.get("TWISTD_SCRIPT"))
 
     @property
     def root(self):
@@ -105,9 +117,15 @@ class TacTestFixtureTestCase(testtools.TestCase):
         """
         tempdir = self.useFixture(TempDir()).path
         fixture = SimpleTac("cannotlisten", tempdir, 1)
+
+        # Since the process might take a small while to shutdown, we'll
+        # retry a few times.
+        retryingAssertThat = retry(
+            stop_max_attempt_number=10, wait_fixed=100)(self.assertThat)
+
         try:
             self.assertRaises(TacException, fixture.setUp)
-            self.assertThat(fixture, Not(IsRunning()))
+            retryingAssertThat(fixture, Not(IsRunning()))
         finally:
             fixture.cleanUp()
 
