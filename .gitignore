@@ -1,0 +1,12 @@
+build
+dist
+MANIFEST
+TAGS
+tags
+doc/_build
+doc/_static
+AUTHORS
+ChangeLog
+txfixtures.egg-info
+*.pyc
+__pycache__
