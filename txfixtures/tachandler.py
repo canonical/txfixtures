@@ -43,6 +43,8 @@ class TacTestFixture(Fixture):
     to tell how long to wait before the daemon is available.
     """
 
+    _proc = None
+
     def setUp(self, spew=False, umask=None,
               python_path=None, twistd_script=None):
         """Initialize a new TacTestFixture fixture.
@@ -98,17 +100,17 @@ class TacTestFixture(Fixture):
 
         # Run twistd, and raise an error if the return value is non-zero or
         # stdout/stderr are written to.
-        proc = subprocess.Popen(
+        self._proc = subprocess.Popen(
             args,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             )
         self.addCleanup(self.killTac)
-        stdout = until_no_eintr(10, proc.stdout.read)
+        stdout = until_no_eintr(10, self._proc.stdout.read)
         if stdout:
             raise TacException('Error running %s: unclean stdout/err: %s'
                                % (args, stdout))
-        rv = proc.wait()
+        rv = self._proc.wait()
         # twistd will normally fork off into the background with the
         # originally-spawned process exiting 0.
         if rv != 0:
@@ -135,7 +137,7 @@ class TacTestFixture(Fixture):
             s.connect((host, port))
             s.close()
             return True
-        except socket.error, e:
+        except socket.error as e:
             if e.errno == errno.ECONNREFUSED:
                 return False
             else:
@@ -168,6 +170,9 @@ class TacTestFixture(Fixture):
         """Kill the TAC file if it is running."""
         pidfile = self.pidfile
         kill_by_pidfile(pidfile)
+        if self._proc:
+            # Close the pipe
+            self._proc.stdout.close()
 
     def sendSignal(self, sig):
         """Send the given signal to the tac process."""

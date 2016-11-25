@@ -143,7 +143,7 @@ class TacTestFixtureTestCase(testtools.TestCase):
         process.wait()
 
         # Put the (now bogus) pid in the pid file.
-        with open(fixture.pidfile, "wb") as pidfile:
+        with open(fixture.pidfile, "w") as pidfile:
             pidfile.write(str(process.pid))
 
         # Fire up the fixture, capturing warnings.
