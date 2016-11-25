@@ -16,7 +16,7 @@ def get_version():
 
 def get_long_description():
     readme_path = os.path.join(
-        os.path.dirname(__file__), 'README')
+        os.path.dirname(__file__), 'README.rst')
     return open(readme_path).read()
 
 

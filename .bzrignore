@@ -3,3 +3,7 @@
 ./MANIFEST
 ./TAGS
 ./tags
+./doc/_build
+./doc/_static
+*.pyc
+__pycache__
