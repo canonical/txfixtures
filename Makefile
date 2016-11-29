@@ -1,7 +1,13 @@
-PYTHON=python
+PYTHON ?= python
+COVERAGE ?= $(PYTHON)-coverage
+
+SOURCE = txfixtures
+OMIT = $(SOURCE)/osutils.py,$(SOURCE)/tachandler.py
 
 check:
-	PYTHONPATH=$(PWD) $(PYTHON) -m testtools.run txfixtures.tests.test_tachandler
+	rm -f .coverage
+	$(COVERAGE) run --omit=$(OMIT) --source=$(SOURCE) -m testtools.run discover
+	$(COVERAGE) report -m --fail-under=100
 
 check-doc:
 	$(MAKE) -C doc doctest

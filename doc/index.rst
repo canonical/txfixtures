@@ -19,7 +19,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-
+   reactor
+   api
 
 Indices and tables
 ==================
