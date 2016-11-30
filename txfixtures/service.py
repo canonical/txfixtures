@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import signal
+import socket
+import logging
 
 from datetime import datetime
 
@@ -31,6 +33,17 @@ from txfixtures._twisted.threading import interruptableCallFromThread
 
 
 TIMEOUT = 15
+
+# Some processes (like mongodb) use an abbreviated code for level names. We
+# keep a mapping for transparently convert between them and standard Python
+# level names.
+SHORT_LEVELS = {
+    "C": "CRITICAL",
+    "E": "ERROR",
+    "W": "WARNING",
+    "I": "INFO",
+    "D": "DEBUG",
+}
 
 
 class Service(Fixture):
@@ -66,6 +79,24 @@ class Service(Fixture):
 
     def setOutputFormat(self, outFormat):
         self.protocol.parser.pattern = outFormat
+
+    def allocatePort(self):
+        """Allocate an unused port.
+
+        This method can be used by subclasses to allocate a random ports for
+        the service they spawn.
+
+        There is a small race condition here (between the time we allocate the
+        port, and the time it actually gets used), but for the purposes for
+        which this method gets used it isn't a problem in practice.
+        """
+        sock = socket.socket()
+        try:
+            sock.bind(("localhost", 0))
+            _, port = sock.getsockname()
+            return port
+        finally:
+            sock.close()
 
     def _setUp(self):
         logging.info("Spawning service process %s", self.command)
@@ -469,7 +500,10 @@ class ServiceOutputParser(LineOnlyReceiver):
         }
 
         if "levelname" in groups:
-            params["levelname"] = groups["levelname"].upper()
+            levelname = groups["levelname"].upper()
+            if len(levelname) == 1:
+                levelname = SHORT_LEVELS.get(levelname, "INFO")
+            params["levelname"] = levelname
             params["levelno"] = logging.getLevelName(params["levelname"])
 
         # Only set creation time if all date-related groups are there.
