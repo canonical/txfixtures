@@ -2,8 +2,6 @@ import os
 import signal
 import socket
 
-from six import b
-
 from testtools import TestCase
 from testtools.twistedsupport import AsynchronousDeferredRunTest
 

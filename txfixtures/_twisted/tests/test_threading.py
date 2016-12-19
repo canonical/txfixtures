@@ -3,7 +3,6 @@ from six import b
 from testtools import TestCase
 
 from twisted.internet import reactor
-from twisted.internet.utils import getProcessOutput
 from twisted.internet.defer import (
     Deferred,
     succeed,

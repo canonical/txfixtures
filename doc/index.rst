@@ -21,6 +21,7 @@ Contents:
 
    reactor
    service
+   phantomjs
    api
 
 Indices and tables
