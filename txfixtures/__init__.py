@@ -3,9 +3,11 @@ from pbr.version import VersionInfo
 from .reactor import (
     Reactor,
 )
+from .service import Service
 
 __all__ = [
     "Reactor",
+    "Service",
 ]
 
 _v = VersionInfo("txfixtures").semantic_version()

@@ -5,6 +5,7 @@ from testtools import TestCase
 from twisted.internet import reactor
 from twisted.internet.utils import getProcessOutput
 from twisted.internet.defer import (
+    Deferred,
     succeed,
     fail,
 )
@@ -41,7 +42,10 @@ class InterruptableCallFromThreadTest(TestCase):
             lambda: fail(RuntimeError("boom")))
 
     def test_timeout(self):
-        """After setUp is run, the reactor is spinning."""
+        """
+        If the async call takes more than the given timeout to execuluted, an
+        error is raised.
+        """
         self.assertRaises(
             CallFromThreadTimeout, interruptableCallFromThread,
-            reactor, 0.1, getProcessOutput, b("/bin/cat"))
+            reactor, 0.1, lambda: Deferred())

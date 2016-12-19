@@ -7,9 +7,14 @@ txfixtures.
 .. toctree::
    :maxdepth: 2
 
-
 txfixtures.reactor
 ------------------
 
 .. automodule:: txfixtures.reactor
+   :members:
+
+txfixtures.service
+------------------
+
+.. automodule:: txfixtures.service
    :members:

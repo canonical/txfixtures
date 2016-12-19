@@ -24,7 +24,6 @@ class Reactor(Fixture):
     This fixture will spawn a new thread in the test process and run the
     Twisted reactor in it. Test code can then invoke asynchronous APIs
     by using :func:`~twisted.internet.threads.blockingCallFromThread`.
-
     """
 
     def __init__(self, reactor=None, timeout=TIMEOUT):

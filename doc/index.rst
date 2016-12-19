@@ -17,9 +17,10 @@ See:
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    reactor
+   service
    api
 
 Indices and tables
