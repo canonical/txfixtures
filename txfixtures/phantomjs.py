@@ -1,5 +1,4 @@
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.common import utils
 from selenium.webdriver.remote import webdriver
 
 from fixtures import TempDir
@@ -28,7 +27,7 @@ class PhantomJS(Service):
         self.setOutputFormat(FORMAT)
 
     def _setUp(self):
-        self.expectPort(utils.free_port())
+        self.expectPort(self.allocatePort())
         self._cookies = self.useFixture(TempDir()).join("phantomjs.cookies")
         super(PhantomJS, self)._setUp()
         url = "http://localhost:%d/wd/hub" % self.protocol.expectedPort

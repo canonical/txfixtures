@@ -6,7 +6,6 @@ from testtools.matchers import (
     DirExists,
 )
 
-from selenium.webdriver.common import utils
 from selenium.webdriver.remote import webdriver
 
 from fixtures import FakeLogger
@@ -16,8 +15,9 @@ from txfixtures._twisted.testing import ThreadedMemoryReactorClock
 from txfixtures.phantomjs import PhantomJS
 
 OUT = (
-    b"[INFO  - 2016-11-17T09:01:38.591Z] GhostDriver - "
-    b"Main - running on port 666\n"
+    b"[INFO  - 2016-11-17T09:01:38.591Z] GhostDriver - ",
+    b"Main - running on port 666",
+    b""
 )
 
 
@@ -34,14 +34,14 @@ class PhantomJSTest(TestCase):
         The fixture passes port and cookies paths as extra argument, and
         configure the output format to match phantomjs' one.
         """
-        self.reactor.process.data = OUT
+        self.reactor.process.data = b"\n".join(OUT)
 
         class FakeWebDriver(object):
 
             def __init__(self, **kwargs):
                 pass
 
-        self.patch(utils, "free_port", lambda: 666)
+        self.patch(self.fixture, "allocatePort", lambda: 666)
         self.patch(webdriver, "WebDriver", FakeWebDriver)
 
         self.fixture.setUp()
