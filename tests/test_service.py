@@ -52,6 +52,7 @@ class ServiceIntegrationTest(TestCase):
     def test_unknown_command(self):
         """If an unknown command is given, setUp raises an error."""
         self.fixture.command = [b"/foobar"]
+        self.fixture.protocol.minUptime = 2.5
         error = self.assertRaises(MultipleExceptions, self.fixture.setUp)
         self.assertIsInstance(error.args[0][1], ProcessTerminated)
         self.assertIn("No such file or directory", self.logger.output)
@@ -169,6 +170,7 @@ class ServiceProtocolIntegrationTest(TestCase):
                 "The 'ready' deferred did not errback, while we were expecting"
                 "an error, due to the process not staying up for at least 0.1"
                 "seconds")
+        yield self.protocol.terminated
 
     @inlineCallbacks
     def test_no_expected_output_exit(self):
@@ -185,6 +187,7 @@ class ServiceProtocolIntegrationTest(TestCase):
             self.assertEqual(0, error.exitCode)
         else:
             self.fail("The 'ready' deferred did not errback")
+        yield self.protocol.terminated
 
     @inlineCallbacks
     def test_no_expected_output_timeout(self):
@@ -245,3 +248,4 @@ class ServiceProtocolIntegrationTest(TestCase):
             self.assertEqual(0, error.exitCode)
         else:
             self.fail("The 'ready' deferred did not errback")
+        yield self.protocol.terminated

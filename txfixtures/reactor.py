@@ -8,7 +8,10 @@ from six.moves.queue import Queue
 from fixtures import Fixture
 
 from twisted.internet import reactor as defaultTwistedReactor
-from twisted.internet.posixbase import _SIGCHLDWaker
+from twisted.internet.posixbase import (
+    _SIGCHLDWaker,
+    _Waker,
+)
 
 from txfixtures._twisted.threading import (
     CallFromThreadTimeout,
@@ -109,15 +112,13 @@ class Reactor(Fixture):
         # wake up epoll() calls.
         self.call(1, self._addSIGCHLDWaker)
 
-        # Install the actual signal hander (this needs to happen in the main
-        # thread).
-        self.reactor._childWaker.install()
-
         # Handle SIGINT (ctrl-c) and SIGTERM. This mimics the regular Twisted
         # code in _SignalReactorMixin._handleSignals (which can't be called
         # from a non-main thread).
         signal.signal(signal.SIGINT, self._handleSigInt)
         signal.signal(signal.SIGTERM, self._handleSigTerm)
+
+        signal.signal(signal.SIGCHLD, self._handleSigChld)
 
         logging.info("Reactor started")
 
@@ -170,10 +171,10 @@ class Reactor(Fixture):
             raise RuntimeError("Hung reactor thread detected")
 
     def _addSIGCHLDWaker(self):
-        """Add a `_SIGNCHLDWaker` to wake up the reactor when a child exits."""
-        self.reactor._childWaker = _SIGCHLDWaker(self.reactor)
-        self.reactor._internalReaders.add(self.reactor._childWaker)
-        self.reactor.addReader(self.reactor._childWaker)
+        """Add a `_ChildWaker` to wake up the reactor when a child exits."""
+        self._childWaker = _ChildWaker(self.reactor)
+        self.reactor._internalReaders.add(self._childWaker)
+        self.reactor.addReader(self._childWaker)
 
     # TODO: the signal handling code below is not tested, probably the best way
     #       would be to have an integration test that spawns a separate test
@@ -195,6 +196,12 @@ class Reactor(Fixture):
         self._maybeFixReactorThreadRace()
         raise sys.exit(args[0])
 
+    def _handleSigChld(self, *args):  # pragma: no cover
+        """
+        Called when a SIGCHLD signal is received.
+        """
+        self.reactor.callFromThread(self._childWaker.wakeUp)
+
     def _maybeFixReactorThreadRace(self):  # pragma: no cover
         # XXX For some obscure reason, this is needed in order to have the
         #     reactor properly wait for the shutdown sequence. It's probably
@@ -203,3 +210,14 @@ class Reactor(Fixture):
         spin = Queue()
         self.reactor.callFromThread(self.reactor.callLater, 0, spin.put, None)
         spin.get(timeout=self.timeout)
+
+
+class _ChildWaker(_SIGCHLDWaker, _Waker):
+    """
+    Twisted's default mechanisim to wake up the main loop upon SIGCHLD
+    relies on signal.set_wakeup_fd to write a zero-length string to the
+    _SIGCHLDWaker's read pipe. However that seems to be thread unsafe,
+    so we use callFromThread to implement the same behavior by hand.
+
+    See Reactor._handleSigChld.
+    """

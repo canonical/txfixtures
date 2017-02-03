@@ -26,7 +26,7 @@ class PhantomJSIntegrationTest(TestCase):
         server.expectPort(8080)
         self.useFixture(server)
 
-        self.fixture = PhantomJS(timeout=5)
+        self.fixture = PhantomJS(timeout=10)
 
     @skipIf(not hasTwist, "twist executable not available")
     def test_webdriver(self):

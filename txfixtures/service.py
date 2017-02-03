@@ -276,7 +276,12 @@ class ServiceProtocol(ProcessProtocol):
     def processEnded(self, reason):
         # Called when the process has been reaped.
         logging.info("Service process reaped")
-        self.terminated.callback(None)
+
+        # Fire the terminated Deferred asynchronously in the next event loop
+        # iteration, since our caller (twisted/internet/process.py) needs
+        # to perform some cleanup *before* we unblock our own code that is
+        # waiting for self.terminated.
+        self.reactor.callLater(0, self.terminated.callback, None)
 
     def _minUptimeElapsed(self):
         """

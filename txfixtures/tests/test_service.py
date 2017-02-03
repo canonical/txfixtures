@@ -142,6 +142,7 @@ class ServiceTest(TestCase):
         """
         self.fixture.setUp()
         self.reactor.process.processEnded(Failure(Exception("boom")))
+        self.reactor.advance(0)
         error = self.assertRaises(RuntimeError, self.fixture.reset)
         self.assertEqual("Service died", str(error))
 
@@ -350,6 +351,7 @@ class ServiceProtocolTest(TestCase):
         self.protocol.makeConnection(self.process)
         self.reactor.advance(self.protocol.minUptime)
         self.protocol.transport.processEnded(0)
+        self.reactor.advance(0)
         self.assertThat(self.protocol.terminated, succeeded(Is(None)))
 
 

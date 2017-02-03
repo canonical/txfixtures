@@ -133,6 +133,9 @@ class ReactorPatcher(MonkeyPatcher):
         #
         # Here we check if the function argument matches the function that
         # we want to timeout.
+        if not args:
+            return
+
         if args[1] == self.callFromThreadTimeout:
             logging.info("Trigger callFromThread timeout")
 

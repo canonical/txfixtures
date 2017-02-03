@@ -5,11 +5,13 @@ from fixtures import FakeLogger
 from systemfixtures import FakeThreads
 
 from twisted.internet.defer import succeed
-from twisted.internet.posixbase import _SIGCHLDWaker
 
 from txfixtures._twisted.testing import ThreadedMemoryReactorClock
 
-from txfixtures.reactor import Reactor
+from txfixtures.reactor import (
+    Reactor,
+    _ChildWaker,
+)
 
 
 class ReactorTest(TestCase):
@@ -27,8 +29,7 @@ class ReactorTest(TestCase):
         """
         self.fixture.setUp()
         [reader] = list(self.reactor.readers)
-        self.assertIsInstance(reader, _SIGCHLDWaker)
-        self.assertTrue(reader.installed)
+        self.assertIsInstance(reader, _ChildWaker)
 
     def test_call(self):
         """The call() method is a convenience around blockingFromThread."""
