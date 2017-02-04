@@ -28,11 +28,11 @@ port 8080:
    ...
    ...     def setUp(self):
    ...         super().setUp()
-   ...         self.useFixture(Reactor())
+   ...         reactor = self.useFixture(Reactor())
    ...
    ...         # Create a service fixture that will spawn the HTTP server
    ...         # and wait for it to listen to port 8080.
-   ...         self.service = Service(HTTP_SERVER)
+   ...         self.service = Service(reactor, HTTP_SERVER)
    ...         self.service.expectPort(8080)
    ...
    ...         self.useFixture(self.service)
@@ -79,8 +79,8 @@ the Python logging system:
    ...     def setUp(self):
    ...         super().setUp()
    ...         self.logger = self.useFixture(FakeLogger())
-   ...         self.useFixture(Reactor())
-   ...         self.service = Service(TWIST_COMMAND)
+   ...         reactor = self.useFixture(Reactor())
+   ...         self.service = Service(reactor, TWIST_COMMAND)
    ...         self.service.setOutputFormat(TWIST_FORMAT)
    ...         self.service.expectOutput(TWIST_OUTPUT)
    ...         self.service.expectPort(8080)

@@ -19,14 +19,14 @@ Selenium_-based assertions:
    ...     def setUp(self):
    ...         super().setUp()
    ...         self.logger = self.useFixture(FakeLogger())
-   ...         self.useFixture(Reactor())
+   ...         reactor = self.useFixture(Reactor())
    ...
    ...         # Create a sample web server
-   ...         self.service = Service(TWIST_COMMAND)
+   ...         self.service = Service(reactor, TWIST_COMMAND)
    ...         self.service.expectPort(8080)
    ...         self.useFixture(self.service)
    ...
-   ...         self.phantomjs = self.useFixture(PhantomJS())
+   ...         self.phantomjs = self.useFixture(PhantomJS(reactor))
    ...
    ...     def test_home_page(self):
    ...         self.phantomjs.webdriver.get("http://localhost:8080")
