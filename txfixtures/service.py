@@ -30,7 +30,6 @@ from twisted.internet.error import (
 )
 from twisted.protocols.basic import LineOnlyReceiver
 
-from txfixtures._twisted.threading import interruptableCallFromThread
 from txfixtures._twisted.backports.defer import addTimeout
 
 
@@ -51,38 +50,28 @@ SHORT_LEVELS = {
 class Service(Fixture):
     """Spawn, control and monitor a background service."""
 
-    def __init__(self, reactor, command, timeout=TIMEOUT):
+    def __init__(self, reactor, command, args=None, env=None, timeout=None):
         super(Service, self).__init__()
+
         self.reactor = reactor
+        self.command = command
+        self.args = args or []
 
-        if isinstance(command, list) or isinstance(command, tuple):
-            args = command[1:]
-            command = command[0]
-        else:
-            args = []
-
-        self.setCommand(command)
-        self.setArgs(args)
-        self.setEnv(os.environ)
+        if env is None:
+            env = os.environ
+        self.env = _encodeDictValues(env)
 
         self._reactor = reactor.reactor
         self._eventTriggerID = None
         self._data_dirs = []
 
+        if timeout is None:
+            timeout = TIMEOUT
         self.protocol = ServiceProtocol(reactor=self._reactor, timeout=timeout)
 
     def reset(self):
         if self.protocol.terminated.called:
             raise RuntimeError("Service died")
-
-    def setCommand(self, command):
-        self.command = command
-
-    def setArgs(self, args):
-        self.args = args
-
-    def setEnv(self, env):
-        self.env = _encodeDictValues(env)
 
     def addDataDir(self):
         data_dir = self.useFixture(TempDir())
@@ -120,9 +109,8 @@ class Service(Fixture):
         self.addCleanup(self._stop)
         self._callFromThread(self._start)
 
-    @property
-    def _args(self):
-        return [self.command] + list(self.args)
+    def _extraArgs(self):
+        return []
 
     @property
     def _name(self):
@@ -131,8 +119,9 @@ class Service(Fixture):
     @inlineCallbacks
     def _start(self):
         self.protocol.parser.setServiceName(self._name)
+        args = [self.command] + self.args + self._extraArgs()
         self._reactor.spawnProcess(
-            self.protocol, self.command, args=self._args, env=self.env)
+            self.protocol, self.command, args=args, env=self.env)
 
         # This cleanup handler will be triggered in case of SIGTERM and SIGINT,
         # when the reactor will initiate an unexpected shutdown sequence.

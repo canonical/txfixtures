@@ -14,8 +14,10 @@ FORMAT = (
 class MongoDB(Service):
     """Start and stop a `mongodb` process in the background. """
 
-    def __init__(self, reactor, timeout=TIMEOUT):
-        super(MongoDB, self).__init__(reactor, COMMAND, timeout=timeout)
+    def __init__(self, reactor, command=COMMAND, args=None, env=None,
+                 timeout=None):
+        super(MongoDB, self).__init__(
+            reactor, command=command, args=args, env=env, timeout=timeout)
 
         self.expectOutput("waiting for connections on port")
         self.setOutputFormat(FORMAT)
@@ -40,9 +42,8 @@ class MongoDB(Service):
         # XXX Workaround pymongo leaving threads around.
         self.addCleanup(pymongo.periodic_executor._shutdown_executors)
 
-    @property
-    def _args(self):
-        return [self.command] + [
+    def _extraArgs(self):
+        return [
             b"--port=%d" % self.port,
             b"--dbpath=%s" % self._data_dirs[0].encode("utf-8"),
             b"--nojournal",

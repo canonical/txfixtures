@@ -21,7 +21,7 @@ class PhantomJSIntegrationTest(TestCase):
         reactor = self.useFixture(Reactor())
 
         # Setup a local web server to test the WebDriver
-        server = Service(reactor, ["twist", "web"], timeout=5)
+        server = Service(reactor, "twist", args=["web"], timeout=5)
         server.expectOutput("Starting reactor...")
         server.expectPort(8080)
         self.useFixture(server)
