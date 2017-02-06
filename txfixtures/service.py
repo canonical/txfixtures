@@ -3,15 +3,16 @@ import os
 import re
 import signal
 import socket
-import logging
 
 from datetime import datetime
 
 from psutil import Process
 
-from fixtures import Fixture
+from fixtures import (
+    Fixture,
+    TempDir,
+)
 
-from twisted.internet import reactor as defaultTwistedReactor
 from twisted.internet.protocol import (
     Factory,
     Protocol,
@@ -50,27 +51,42 @@ SHORT_LEVELS = {
 class Service(Fixture):
     """Spawn, control and monitor a background service."""
 
-    def __init__(self, command, reactor=None, timeout=TIMEOUT, env=None):
+    def __init__(self, reactor, command, timeout=TIMEOUT):
         super(Service, self).__init__()
-        self.command = command
-        self.env = _encodeDictValues(env or os.environ.copy())
-        parser = ServiceOutputParser(self._executable)
+        self.reactor = reactor
 
-        # XXX Set the reactor as private, since the public 'reactor' attribute
-        #     is typically a Reactor fixture, set by testresources as
-        #     dependency.
-        if reactor is None:
-            reactor = defaultTwistedReactor
-        self._reactor = reactor
+        if isinstance(command, list) or isinstance(command, tuple):
+            args = command[1:]
+            command = command[0]
+        else:
+            args = []
 
-        self.protocol = ServiceProtocol(
-            reactor=self._reactor, parser=parser, timeout=timeout)
+        self.setCommand(command)
+        self.setArgs(args)
+        self.setEnv(os.environ)
 
+        self._reactor = reactor.reactor
         self._eventTriggerID = None
+        self._data_dirs = []
+
+        self.protocol = ServiceProtocol(reactor=self._reactor, timeout=timeout)
 
     def reset(self):
         if self.protocol.terminated.called:
             raise RuntimeError("Service died")
+
+    def setCommand(self, command):
+        self.command = command
+
+    def setArgs(self, args):
+        self.args = args
+
+    def setEnv(self, env):
+        self.env = _encodeDictValues(env)
+
+    def addDataDir(self):
+        data_dir = self.useFixture(TempDir())
+        self._data_dirs.append(data_dir.path)
 
     def expectOutput(self, data):
         self.protocol.expectedOutput = data
@@ -105,21 +121,18 @@ class Service(Fixture):
         self._callFromThread(self._start)
 
     @property
-    def _executable(self):
-        return self.command[0]
-
-    @property
     def _args(self):
-        return self.command
+        return [self.command] + list(self.args)
 
     @property
     def _name(self):
-        return os.path.basename(self._executable)
+        return os.path.basename(self.command)
 
     @inlineCallbacks
     def _start(self):
+        self.protocol.parser.setServiceName(self._name)
         self._reactor.spawnProcess(
-            self.protocol, self._executable, args=self._args, env=self.env)
+            self.protocol, self.command, args=self._args, env=self.env)
 
         # This cleanup handler will be triggered in case of SIGTERM and SIGINT,
         # when the reactor will initiate an unexpected shutdown sequence.
@@ -148,8 +161,7 @@ class Service(Fixture):
         # want this timeout to be greater than the 'ready' deferred timeout
         # set in _start(), so if the reactor thread is hung or dies we still
         # properly timeout.
-        timeout = self.protocol.timeout + 1
-        interruptableCallFromThread(self._reactor, timeout, f)
+        self.reactor.call(self.protocol.timeout + 1, f)
 
     @inlineCallbacks
     def _terminateProcess(self):
@@ -178,11 +190,11 @@ class ServiceProtocol(ProcessProtocol):
     #: The service process must stay up at least this amount of seconds, before
     #: it's considered running. This allows to catch common issues like the
     #: service process executable not being in PATH or not being executable.
-    minUptime = 0.1
+    minUptime = 0.2
 
-    def __init__(self, reactor=None, parser=None, timeout=TIMEOUT):
-        self.reactor = reactor or defaultTwistedReactor
-        self.parser = parser or ServiceOutputParser("")
+    def __init__(self, reactor, parser=None, timeout=TIMEOUT):
+        self.reactor = reactor
+        self.parser = parser or ServiceOutputParser()
 
         #: Maximum amount of seconds to wait for the service to be ready. After
         #: that, the 'ready' deferred will errback with a TimeoutError.
@@ -445,16 +457,18 @@ class ServiceOutputParser(LineOnlyReceiver):
         "message": "(?P<message>.+)",
     }
 
-    def __init__(self, service, logger=None, pattern=None):
-        """
-        :param service: A string identifying the service whose output is being
-            parsed. It will be attached as 'service' attribute to all log
-            records emitted.
-        """
-        self.service = service
+    #: A string identifying the service whose output is being
+    #: parsed. It will be attached as 'service' attribute to all log
+    #: records emitted.
+    service = ""
+
+    def __init__(self, logger=None, pattern=None):
         self.pattern = pattern or "{message}"
         self.logger = logger or logging.getLogger("")
         self._callbacks = {}
+
+    def setServiceName(self, name):
+        self.service = name
 
     def whenLineContains(self, text, callback):
         """Fire the given callback when a line contains the given text.
@@ -540,7 +554,7 @@ def _encodeDictValues(d):
     """
     return dict(
         [(_maybeEncode(k), _maybeEncode(v))
-        for k, v in d.items() if v is not None])
+         for k, v in d.items() if v is not None])
 
 
 def _maybeEncode(x):
