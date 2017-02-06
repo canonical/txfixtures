@@ -52,7 +52,7 @@ class ServiceIntegrationTest(TestCase):
 
     def test_unknown_command(self):
         """If an unknown command is given, setUp raises an error."""
-        self.fixture.setCommand(b"/foobar")
+        self.fixture.command = b"/foobar"
         self.fixture.protocol.minUptime = 2.5
         error = self.assertRaises(MultipleExceptions, self.fixture.setUp)
         self.assertIsInstance(error.args[0][1], ProcessTerminated)
@@ -60,10 +60,10 @@ class ServiceIntegrationTest(TestCase):
 
     def test_non_executable_command(self):
         """If the given command is not executable, setUp raises an error."""
-        executable = self.useFixture(TempDir()).join("foobar")
-        with open(executable, "w") as fd:
+        path = self.useFixture(TempDir()).join("foobar")
+        with open(path, "w") as fd:
             fd.write("")
-        self.fixture.setCommand(executable.encode("utf-8"))
+        self.fixture.command = path.encode("utf-8")
         self.fixture.protocol.minUptime = 2.5
         error = self.assertRaises(MultipleExceptions, self.fixture.setUp)
         self.assertIsInstance(error.args[0][1], ProcessTerminated)

@@ -12,7 +12,8 @@ Selenium_-based assertions:
    >>> from testtools import TestCase
    >>> from txfixtures import Reactor, Service, PhantomJS
 
-   >>> TWIST_COMMAND = "twistd -n web".split(" ")
+   >>> TWISTD = "twistd"
+   >>> TWISTD_ARGS = "-n web".split(" ")
 
    >>> class HTTPServerTest(TestCase):
    ...
@@ -22,7 +23,7 @@ Selenium_-based assertions:
    ...         reactor = self.useFixture(Reactor())
    ...
    ...         # Create a sample web server
-   ...         self.service = Service(reactor, TWIST_COMMAND)
+   ...         self.service = Service(reactor, TWISTD, args=TWISTD_ARGS)
    ...         self.service.expectPort(8080)
    ...         self.useFixture(self.service)
    ...

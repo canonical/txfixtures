@@ -67,14 +67,6 @@ class ServiceTest(TestCase):
         self.assertEqual(["foo"], self.reactor.process.args)
         self.assertIn("Service process ready", self.logger.output)
 
-    def test_set_env(self):
-        """
-        It's possible to set custom environment variables. The key and values
-        will be automatically encoded.
-        """
-        self.fixture.setEnv({"foo": "bar"})
-        self.assertEqual({b"foo": b"bar"}, self.fixture.env)
-
     def test_expect_output(self):
         """
         It's possible to specify a string that should match the service's

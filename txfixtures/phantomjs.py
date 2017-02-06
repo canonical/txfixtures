@@ -16,8 +16,10 @@ FORMAT = (
 class PhantomJS(Service):
     """Start and stop a `phantomjs` process in the background. """
 
-    def __init__(self, reactor, timeout=TIMEOUT):
-        super(PhantomJS, self).__init__(reactor, COMMAND, timeout=timeout)
+    def __init__(self, reactor, command=COMMAND, args=None, env=None,
+                 timeout=None):
+        super(PhantomJS, self).__init__(
+            reactor, command=command, args=args, env=env, timeout=timeout)
 
         #: Desired capabilities that will be passed to the webdriver.
         self.desiredCapabilities = DesiredCapabilities.PHANTOMJS
@@ -38,10 +40,9 @@ class PhantomJS(Service):
             command_executor=url,
             desired_capabilities=self.desiredCapabilities)
 
-    @property
-    def _args(self):
+    def _extraArgs(self):
         cookies_file = os.path.join(self._data_dirs[0], "phantomjs.cookies")
-        return [self.command] + [
+        return [
             "--webdriver=%d" % self.protocol.expectedPort,
             "--cookies-file=%s" % cookies_file,
         ]
