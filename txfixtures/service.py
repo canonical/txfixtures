@@ -63,7 +63,7 @@ class Service(Fixture):
 
         self.setCommand(command)
         self.setArgs(args)
-        self.setEnv({})
+        self.setEnv(os.environ)
 
         self._reactor = reactor.reactor
         self._eventTriggerID = None
