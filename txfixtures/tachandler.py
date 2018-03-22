@@ -105,8 +105,8 @@ class TacTestFixture(Fixture):
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             )
+        self.addCleanup(self.killTac)
         try:
-            self.addCleanup(self.killTac)
             stdout = until_no_eintr(10, self._proc.stdout.read)
             if stdout:
                 raise TacException('Error running %s: unclean stdout/err: %s'
