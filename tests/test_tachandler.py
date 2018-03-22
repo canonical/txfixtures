@@ -23,10 +23,6 @@ from testtools.matchers import (
     Not,
     )
 
-from twisted.scripts import twistd
-
-from retrying import retry
-
 from txfixtures.tachandler import (
     TacException,
     TacTestFixture,
@@ -105,11 +101,8 @@ class TacTestFixtureTestCase(testtools.TestCase):
     def test_missingTac(self):
         """TacTestFixture raises TacException if the tacfile doesn't exist"""
         fixture = SimpleTac("missing", "/file/does/not/exist", 0)
-        try:
-            self.assertRaises(TacException, fixture.setUp)
-            self.assertThat(fixture, Not(IsRunning()))
-        finally:
-            fixture.cleanUp()
+        self.assertRaises(TacException, self.useFixture, fixture)
+        self.assertThat(fixture, Not(IsRunning()))
 
     def test_couldNotListenTac(self):
         """If the tac fails due to not being able to listen on the needed
@@ -118,16 +111,8 @@ class TacTestFixtureTestCase(testtools.TestCase):
         tempdir = self.useFixture(TempDir()).path
         fixture = SimpleTac("cannotlisten", tempdir, 1)
 
-        # Since the process might take a small while to shutdown, we'll
-        # retry a few times.
-        retryingAssertThat = retry(
-            stop_max_attempt_number=10, wait_fixed=100)(self.assertThat)
-
-        try:
-            self.assertRaises(TacException, fixture.setUp)
-            retryingAssertThat(fixture, Not(IsRunning()))
-        finally:
-            fixture.cleanUp()
+        self.assertRaises(TacException, self.useFixture, fixture)
+        self.assertThat(fixture, Not(IsRunning()))
 
     def test_stalePidFile(self):
         """TacTestFixture complains about stale pid files."""
@@ -148,11 +133,8 @@ class TacTestFixtureTestCase(testtools.TestCase):
 
         # Fire up the fixture, capturing warnings.
         with warnings.catch_warnings(record=True) as warnings_log:
-            try:
-                self.assertRaises(TacException, fixture.setUp)
-                self.assertThat(fixture, Not(IsRunning()))
-            finally:
-                fixture.cleanUp()
+            self.assertRaises(TacException, self.useFixture, fixture)
+            self.assertThat(fixture, Not(IsRunning()))
 
         # One deprecation warning is emitted.
         self.assertEqual(1, len(warnings_log))
