@@ -30,11 +30,12 @@ def _kill_may_race(pid, signal_number):
 
 def get_pid_from_file(pidfile_path):
     """Retrieve the PID from the given file, if it exists, None otherwise."""
-    if not os.path.exists(pidfile_path):
+    # Get the pid, ignoring failures due to the pidfile not existing.
+    try:
+        with open(pidfile_path, 'r') as fd:
+            pid = fd.read().split()[0]
+    except IOError:
         return None
-    # Get the pid.
-    with open(pidfile_path, 'r') as fd:
-        pid = fd.read().split()[0]
     try:
         pid = int(pid)
     except ValueError:
