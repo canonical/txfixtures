@@ -106,18 +106,22 @@ class TacTestFixture(Fixture):
             stderr=subprocess.STDOUT,
             )
         self.addCleanup(self.killTac)
-        stdout = until_no_eintr(10, self._proc.stdout.read)
-        if stdout:
-            raise TacException('Error running %s: unclean stdout/err: %s'
-                               % (args, stdout))
-        rv = self._proc.wait()
-        # twistd will normally fork off into the background with the
-        # originally-spawned process exiting 0.
-        if rv != 0:
-            raise TacException('Error %d running %s' % (rv, args))
+        try:
+            stdout = until_no_eintr(10, self._proc.stdout.read)
+            if stdout:
+                raise TacException('Error running %s: unclean stdout/err: %s'
+                                   % (args, stdout))
+            rv = self._proc.wait()
+            # twistd will normally fork off into the background with the
+            # originally-spawned process exiting 0.
+            if rv != 0:
+                raise TacException('Error %d running %s' % (rv, args))
 
-        self.addDetail(self.logfile, content_from_file(self.logfile))
-        self._waitForDaemonStartup()
+            self.addDetail(self.logfile, content_from_file(self.logfile))
+            self._waitForDaemonStartup()
+        except Exception:
+            self.cleanUp()
+            raise
 
     def _hasDaemonStarted(self):
         """Has the daemon started?
