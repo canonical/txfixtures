@@ -15,13 +15,13 @@ EXPECTED_SIGNALS = (signal.SIGTERM, signal.SIGTERM)
 class ThreadedMemoryReactorClock(MemoryReactorClock):
     """Extend Twisted's test reactor with more reactor-level features.
 
-    :ivar async: A flag indicating whether callFromThread calls should be
+    :ivar isAsync: A flag indicating whether callFromThread calls should be
         executed synchronously as soon as callFromThread is called.
     """
 
     def __init__(self):
         super(ThreadedMemoryReactorClock, self).__init__()
-        self.async = False
+        self.isAsync = False
         self.process = MemoryProcess()
         self._internalReaders = set()
 
@@ -35,7 +35,7 @@ class ThreadedMemoryReactorClock(MemoryReactorClock):
         self.running = False
 
     def callFromThread(self, f, *args, **kwargs):
-        if self.async:
+        if self.isAsync:
             return
         f(*args, **kwargs)
 
