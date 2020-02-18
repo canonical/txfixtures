@@ -110,7 +110,7 @@ class ReactorTest(TestCase):
         If cleanUp() can't stop the reactor, an error is raised.
         """
         self.fixture.setUp()
-        self.reactor.async = True
+        self.reactor.isAsync = True
         self.fixture.thread.alive = True
 
         error = self.assertRaises(RuntimeError, self.fixture.cleanUp)
