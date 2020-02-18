@@ -133,9 +133,6 @@ class ServiceProtocolIntegrationTest(TestCase):
         self.protocol.expectedPort = self.script.port
         self.process = reactor.spawnProcess(self.protocol, self.script.path)
         yield self.protocol.ready
-        sock = socket.socket()
-        sock.connect(("localhost", self.script.port))
-        self.addCleanup(sock.close)
         self.assertIn("Service opened port", self.logger.output)
 
     @inlineCallbacks
@@ -150,9 +147,6 @@ class ServiceProtocolIntegrationTest(TestCase):
         self.protocol.expectedPort = self.script.port
         self.process = reactor.spawnProcess(self.protocol, self.script.path)
         yield self.protocol.ready
-        sock = socket.socket()
-        sock.connect(("localhost", self.script.port))
-        self.addCleanup(sock.close)
         self.assertIn("Service port probe failed", self.logger.output)
         self.assertIn("Service opened port", self.logger.output)
 
