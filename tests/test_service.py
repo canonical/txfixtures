@@ -105,7 +105,8 @@ class ServiceProtocolIntegrationTest(TestCase):
         The `ready` deferred fires when the service is ready.
         """
         self.script.sleep(1)
-        self.process = reactor.spawnProcess(self.protocol, self.script.path)
+        self.process = reactor.spawnProcess(
+            self.protocol, self.script.path, [self.script.path])
         yield self.protocol.ready
         self.assertIn("Service process ready", self.logger.output)
 
@@ -118,7 +119,8 @@ class ServiceProtocolIntegrationTest(TestCase):
         self.script.out("hello")
         self.script.sleep(1)
         self.protocol.expectedOutput = "hello"
-        self.process = reactor.spawnProcess(self.protocol, self.script.path)
+        self.process = reactor.spawnProcess(
+            self.protocol, self.script.path, [self.script.path])
         yield self.protocol.ready
         self.assertIn("hello", self.logger.output)
 
@@ -131,7 +133,8 @@ class ServiceProtocolIntegrationTest(TestCase):
         self.script.listen()
         self.script.sleep(1)
         self.protocol.expectedPort = self.script.port
-        self.process = reactor.spawnProcess(self.protocol, self.script.path)
+        self.process = reactor.spawnProcess(
+            self.protocol, self.script.path, [self.script.path])
         yield self.protocol.ready
         sock = socket.socket()
         sock.connect(("localhost", self.script.port))
@@ -148,7 +151,8 @@ class ServiceProtocolIntegrationTest(TestCase):
         self.script.listen()
         self.script.sleep(1)
         self.protocol.expectedPort = self.script.port
-        self.process = reactor.spawnProcess(self.protocol, self.script.path)
+        self.process = reactor.spawnProcess(
+            self.protocol, self.script.path, [self.script.path])
         yield self.protocol.ready
         sock = socket.socket()
         sock.connect(("localhost", self.script.port))
@@ -161,7 +165,8 @@ class ServiceProtocolIntegrationTest(TestCase):
         """If the service doesn't stay up for minUpTime, an error is raised."""
         # Spawn a non-existing process, which will make os.execvp fail,
         # triggering ServiceProtocol.processExited almost immediately.
-        self.process = reactor.spawnProcess(self.protocol, b"/foo/bar")
+        self.process = reactor.spawnProcess(
+            self.protocol, b"/foo/bar", [b"/foo/bar"])
         try:
             yield self.protocol.ready
         except ProcessTerminated as error:
@@ -180,7 +185,8 @@ class ServiceProtocolIntegrationTest(TestCase):
         """
         self.script.sleep(0.2)
         self.protocol.expectedOutput = "hello"
-        self.process = reactor.spawnProcess(self.protocol, self.script.path)
+        self.process = reactor.spawnProcess(
+            self.protocol, self.script.path, [self.script.path])
         try:
             yield self.protocol.ready
         except ProcessDone as error:
@@ -197,7 +203,8 @@ class ServiceProtocolIntegrationTest(TestCase):
         self.script.sleep(1)
         self.protocol.expectedOutput = "hello"
         addTimeout(self.protocol.ready, 0.2, reactor)
-        self.process = reactor.spawnProcess(self.protocol, self.script.path)
+        self.process = reactor.spawnProcess(
+            self.protocol, self.script.path, [self.script.path])
         try:
             yield self.protocol.ready
         except TimeoutError as error:
@@ -222,7 +229,8 @@ class ServiceProtocolIntegrationTest(TestCase):
         _, self.protocol.expectedPort = sock.getsockname()
 
         addTimeout(self.protocol.ready, 0.2, reactor)
-        self.process = reactor.spawnProcess(self.protocol, self.script.path)
+        self.process = reactor.spawnProcess(
+            self.protocol, self.script.path, [self.script.path])
         try:
             yield self.protocol.ready
         except TimeoutError as error:
@@ -240,7 +248,8 @@ class ServiceProtocolIntegrationTest(TestCase):
         """
         self.script.sleep(0.2)
         self.protocol.expectedPort = 9999
-        self.process = reactor.spawnProcess(self.protocol, self.script.path)
+        self.process = reactor.spawnProcess(
+            self.protocol, self.script.path, [self.script.path])
         try:
             yield self.protocol.ready
         except ProcessDone as error:
