@@ -44,6 +44,20 @@ def get_pid_from_file(pidfile_path):
     return pid
 
 
+def process_exists(pid):
+    """Return True if the specified process already exists."""
+    try:
+        os.kill(pid, 0)
+    except os.error as err:
+        if err.errno == errno.ESRCH:
+            # All is well - the process doesn't exist.
+            return False
+        else:
+            # We got a strange OSError, which we'll pass upwards.
+            raise
+    return True
+
+
 def two_stage_kill(pid, poll_interval=0.1, num_polls=50):
     """Kill process 'pid' with SIGTERM. If it doesn't die, SIGKILL it.
 
@@ -57,18 +71,10 @@ def two_stage_kill(pid, poll_interval=0.1, num_polls=50):
 
     # Poll until the process has ended.
     for i in range(num_polls):
-        try:
-            # Reap the child process and get its return value. If it's not
-            # gone yet, continue.
-            new_pid, result = os.waitpid(pid, os.WNOHANG)
-            if new_pid:
-                return result
-            time.sleep(poll_interval)
-        except OSError as e:
-            if e.errno in (errno.ESRCH, errno.ECHILD):
-                # Raised if the process is gone by the time we try to get the
-                # return value.
-                return
+        # If the process isn't gone yet, continue.
+        if not process_exists(pid):
+            return
+        time.sleep(poll_interval)
 
     # The process is still around, so terminate it violently.
     _kill_may_race(pid, SIGKILL)
