@@ -16,7 +16,8 @@ class MongoDB(Service):
         super(MongoDB, self).__init__(
             reactor, command=command, args=args, env=env, timeout=timeout)
 
-        self.expectOutput("waiting for connections on port")
+        self.expectOutput(
+            "waiting for connections on port", "Waiting for connections")
         self.setOutputFormat(FORMAT)
         self.setClientKwargs()
 
