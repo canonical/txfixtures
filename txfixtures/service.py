@@ -5,6 +5,7 @@ import signal
 import socket
 
 from datetime import datetime
+from functools import partial
 
 from psutil import Process
 
@@ -77,8 +78,8 @@ class Service(Fixture):
         data_dir = self.useFixture(TempDir())
         self._data_dirs.append(data_dir.path)
 
-    def expectOutput(self, data):
-        self.protocol.expectedOutput = data
+    def expectOutput(self, *data):
+        self.protocol.expectedOutput = list(data)
 
     def expectPort(self, port):
         self.protocol.expectedPort = port
@@ -189,9 +190,9 @@ class ServiceProtocol(ProcessProtocol):
         #: that, the 'ready' deferred will errback with a TimeoutError.
         self.timeout = timeout
 
-        #: Optional text that we expect the process to emit in standard output
-        #: before we consider it ready.
-        self.expectedOutput = None
+        #: List of text strings, one of which we expect the process to emit
+        #: in standard output before we consider it ready.
+        self.expectedOutput = []
 
         #: Optional port number that we expect the service process to listen,
         #: before we consider it ready.
@@ -248,8 +249,12 @@ class ServiceProtocol(ProcessProtocol):
         if self.expectedOutput:
             # From this point on, be prepared to receive the expected output at
             # any time.
-            self.parser.whenLineContains(
-                self.expectedOutput, self._expectedOutputReceived)
+            expectedOutput = (
+                self.expectedOutput if isinstance(self.expectedOutput, list)
+                else [self.expectedOutput])
+            for text in expectedOutput:
+                self.parser.whenLineContains(
+                    text, partial(self._expectedOutputReceived, text))
         else:
             # There's no output we expect, so we fire this Deferred right away.
             # When _minUptimeElapsed will be called, the callback that gets
@@ -293,7 +298,7 @@ class ServiceProtocol(ProcessProtocol):
             self._expectedOutputReady.addCallback(self._startProbePortLoop)
         self._expectedOutputReady.addCallback(self._maybeFireReady)
 
-    def _expectedOutputReceived(self):
+    def _expectedOutputReceived(self, text):
         """
         Called after `_minUptimeElapsed` and the service process has emitted
         the expected output string.
@@ -301,7 +306,7 @@ class ServiceProtocol(ProcessProtocol):
         # Let's fire the relevant deferred, so we can move forward to polling
         # the expected port, or declaring the service as ready (if there's no
         # expected port).
-        logging.info("Service process emitted '%s'", self.expectedOutput)
+        logging.info("Service process emitted '%s'", text)
         self._expectedOutputReady.callback(None)
 
     @inlineCallbacks
