@@ -34,12 +34,13 @@ class MongoDB(Service):
         self.addDataDir()
         super(MongoDB, self)._setUp()
         uri = "mongodb://localhost:%d" % self.port
-        self.client = pymongo.MongoClient(uri, **self.clientKwargs)
-        self.addCleanup(self.client.close)
 
         # XXX Workaround pymongo leaving threads around.
         if int(pymongo.version.split(".")[0]) >= 3:
             self.addCleanup(pymongo.periodic_executor._shutdown_executors)
+
+        self.client = pymongo.MongoClient(uri, **self.clientKwargs)
+        self.addCleanup(self.client.close)
 
     def _extraArgs(self):
         return [
