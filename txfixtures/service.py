@@ -36,9 +36,11 @@ from txfixtures._twisted.backports.defer import addTimeout
 
 TIMEOUT = 15
 
-# Some processes (like mongodb) use an abbreviated code for level names. We
+# Some processes use an abbreviated code for level names. We
 # keep a mapping for transparently convert between them and standard Python
 # level names.
+# XXX jugmac00 2024-05-10: this was introduced to support MongoDB, which is no
+# longer in use, so this mapping might be obsolete. 
 SHORT_LEVELS = {
     "C": "CRITICAL",
     "E": "ERROR",
