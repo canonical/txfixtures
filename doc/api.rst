@@ -19,8 +19,3 @@ txfixtures.service
 .. automodule:: txfixtures.service
    :members:
 
-txfixtures.phantomjs
---------------------
-
-.. automodule:: txfixtures.phantomjs
-   :members:
