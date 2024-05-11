@@ -4,7 +4,10 @@ import re
 import signal
 import socket
 
-from datetime import datetime
+from datetime import (
+    datetime,
+    timezone,
+)
 from functools import partial
 
 from psutil import Process
@@ -528,6 +531,7 @@ class ServiceOutputParser(LineOnlyReceiver):
                 int(groups["H"]),
                 int(groups["M"]),
                 int(groups["S"]),
+                tzinfo=timezone.utc,
             ).strftime("%s"))
 
         if "msecs" in groups:
