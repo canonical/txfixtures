@@ -36,19 +36,6 @@ from txfixtures._twisted.backports.defer import addTimeout
 
 TIMEOUT = 15
 
-# Some processes use an abbreviated code for level names. We
-# keep a mapping for transparently convert between them and standard Python
-# level names.
-# XXX jugmac00 2024-05-10: this was introduced to support MongoDB, which is no
-# longer in use, so this mapping might be obsolete. 
-SHORT_LEVELS = {
-    "C": "CRITICAL",
-    "E": "ERROR",
-    "W": "WARNING",
-    "I": "INFO",
-    "D": "DEBUG",
-}
-
 
 class Service(Fixture):
     """Spawn, control and monitor a background service."""
@@ -76,10 +63,6 @@ class Service(Fixture):
         if self.protocol.terminated.called:
             raise RuntimeError("Service died")
 
-    def addDataDir(self):
-        data_dir = self.useFixture(TempDir())
-        self._data_dirs.append(data_dir.path)
-
     def expectOutput(self, *data):
         self.protocol.expectedOutput = list(data)
 
@@ -88,24 +71,6 @@ class Service(Fixture):
 
     def setOutputFormat(self, outFormat):
         self.protocol.parser.pattern = outFormat
-
-    def allocatePort(self):
-        """Allocate an unused port.
-
-        This method can be used by subclasses to allocate a random ports for
-        the service they spawn.
-
-        There is a small race condition here (between the time we allocate the
-        port, and the time it actually gets used), but for the purposes for
-        which this method gets used it isn't a problem in practice.
-        """
-        sock = socket.socket()
-        try:
-            sock.bind(("localhost", 0))
-            _, port = sock.getsockname()
-            return port
-        finally:
-            sock.close()
 
     def _setUp(self):
         logging.info("Spawning service process %s", self.command)
@@ -514,8 +479,6 @@ class ServiceOutputParser(LineOnlyReceiver):
 
         if "levelname" in groups:
             levelname = groups["levelname"].upper()
-            if len(levelname) == 1:
-                levelname = SHORT_LEVELS.get(levelname, "INFO")
             params["levelname"] = levelname
             params["levelno"] = logging.getLevelName(params["levelname"])
 

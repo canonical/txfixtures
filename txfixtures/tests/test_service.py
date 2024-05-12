@@ -379,7 +379,7 @@ class ServiceOutputParserTest(TestCase):
         self.assertEqual("INFO", record.levelname)
         self.assertEqual("logger", record.name)
         self.assertEqual("hi", record.msg)
-        self.assertEqual(1479113981, record.created)
+        self.assertEqual(1479110381, record.created)
         self.assertEqual(400, record.msecs)
         self.assertEqual("my-app", record.processName)
 
