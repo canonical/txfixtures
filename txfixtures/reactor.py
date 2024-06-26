@@ -7,7 +7,11 @@ from six.moves.queue import Queue
 
 from fixtures import Fixture
 
-from twisted.internet.posixbase import _SIGCHLDWaker
+# _SIGCHLDWaker was moved in Twisted version 23.8
+try:
+    from twisted.internet.posixbase import _SIGCHLDWaker
+except ImportError:
+    from twisted.internet._signals import _SIGCHLDWaker
 from twisted.internet.epollreactor import EPollReactor
 
 from txfixtures._twisted.threading import (
@@ -107,7 +111,7 @@ class Reactor(Fixture):
         # reactor thread as it's not thread-safe. The SIGCHLD waker will
         # react to SIGCHLD signals by writing to a dummy pipe, which will
         # wake up epoll() calls.
-        self.reactor._childWaker = _SIGCHLDWaker(self.reactor)
+        self.reactor._childWaker = _SIGCHLDWaker()
         self.call(1, self._addSIGCHLDWaker)
 
         # Install the actual signal hander (this needs to happen in the main

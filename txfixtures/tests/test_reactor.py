@@ -5,7 +5,14 @@ from fixtures import FakeLogger
 from systemfixtures import FakeThreads
 
 from twisted.internet.defer import succeed
-from twisted.internet.posixbase import _SIGCHLDWaker
+
+# _SIGCHLDWaker was moved in Twisted version 23.8
+try:
+    from twisted.internet.posixbase import _SIGCHLDWaker
+except ImportError:
+    from twisted.internet._signals import _SIGCHLDWaker
+
+from twisted.internet.epollreactor import EPollReactor
 
 from txfixtures._twisted.testing import ThreadedMemoryReactorClock
 
