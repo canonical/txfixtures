@@ -1,2 +1,1 @@
-exclude .travis.yml
 exclude .mailmap
