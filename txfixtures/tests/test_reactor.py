@@ -76,7 +76,7 @@ class ReactorTest(TestCase):
         """After cleanUp is run, the reactor is stopped."""
         self.fixture.setUp()
         self.fixture.cleanUp()
-        self.assertFalse(self.fixture.thread.isAlive())
+        self.assertFalse(self.fixture.thread.is_alive())
         self.assertFalse(self.fixture.reactor.running)
 
     def test_cleanup_thread_not_alive(self):
