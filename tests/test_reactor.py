@@ -169,7 +169,7 @@ class ReactorIntegrationTest(TestCase):
         if self.fixture.thread:
             logging.info("Waiting for thread to terminate")
             self.fixture.thread.join(timeout=TIMEOUT)
-            assert not self.fixture.thread.isAlive(), "Thread did not stop"
+            assert not self.fixture.thread.is_alive(), "Thread did not stop"
 
     def test_reactor_running(self):
         """After setUp is run, the reactor is spinning."""
@@ -215,7 +215,7 @@ class ReactorIntegrationTest(TestCase):
         self.useFixture(self.fixture)
         self.fixture.call(TIMEOUT, self.reactor.crash)
         self.fixture.thread.join(timeout=TIMEOUT)
-        self.assertFalse(self.fixture.thread.isAlive())
+        self.assertFalse(self.fixture.thread.is_alive())
 
         self.fixture.reset()
         self.assertTrue(self.reactor.running)
@@ -236,7 +236,7 @@ class ReactorIntegrationTest(TestCase):
 
         # At this point the thread should be dead and the reactor broken
         self.fixture.thread.join(TIMEOUT)
-        self.assertFalse(self.fixture.thread.isAlive())
+        self.assertFalse(self.fixture.thread.is_alive())
         self.assertTrue(self.reactor.running)
 
         self.fixture.reset()
@@ -249,7 +249,7 @@ class ReactorIntegrationTest(TestCase):
             self.logger.output)
 
         # Things should be back to normality
-        self.assertTrue(self.fixture.thread.isAlive(), "Thread did not resume")
+        self.assertTrue(self.fixture.thread.is_alive(), "Thread did not resume")
         self.assertTrue(
             self.reactor.running, "Reactor did not recover")
 
@@ -266,7 +266,7 @@ class ReactorIntegrationTest(TestCase):
         self.patcher.crashingNotify.get(timeout=TIMEOUT)
 
         # At this point the thread should be alive and the reactor broken
-        self.assertTrue(self.fixture.thread.isAlive())
+        self.assertTrue(self.fixture.thread.is_alive())
         self.assertFalse(self.reactor.running)
 
         error = self.assertRaises(RuntimeError, self.fixture.reset)
@@ -276,7 +276,7 @@ class ReactorIntegrationTest(TestCase):
         """After cleanUp is run, the reactor is stopped."""
         self.fixture.setUp()
         self.fixture.cleanUp()
-        self.assertFalse(self.fixture.thread.isAlive())
+        self.assertFalse(self.fixture.thread.is_alive())
         self.assertFalse(self.reactor.running)
 
     def test_cleanup_thread_not_alive(self):
@@ -310,7 +310,7 @@ class ReactorIntegrationTest(TestCase):
         self.patcher.crashingNotify.get(timeout=TIMEOUT)
 
         # At this point the thread should be alive and the reactor stopped
-        self.assertTrue(self.fixture.thread.isAlive())
+        self.assertTrue(self.fixture.thread.is_alive())
         self.assertFalse(self.reactor.running)
 
         error = self.assertRaises(RuntimeError, self.fixture.cleanUp)
@@ -326,7 +326,7 @@ class ReactorIntegrationTest(TestCase):
         self.fixture.setUp()
 
         # At this point the thread should be alive and the reactor running
-        self.assertTrue(self.fixture.thread.isAlive())
+        self.assertTrue(self.fixture.thread.is_alive())
         self.assertTrue(self.reactor.running)
 
         error = self.assertRaises(RuntimeError, self.fixture.cleanUp)

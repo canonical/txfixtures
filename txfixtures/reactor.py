@@ -66,7 +66,7 @@ class Reactor(Fixture):
         recover them by creating a new thread and starting the reactor again.
         """
 
-        if not self.thread.isAlive():
+        if not self.thread.is_alive():
             # The thread died, let's try our best to recover.
             logging.warning("Twisted reactor thread died, trying to recover")
             self._stop()  # Resets the reactor in case it's in a broken state.
@@ -124,7 +124,7 @@ class Reactor(Fixture):
 
     def _stop(self):
 
-        if self.thread.isAlive():
+        if self.thread.is_alive():
             # The thread is running, let's attempt a clean shutdown.
             logging.info("Stopping Twisted reactor and wait for its thread")
 
@@ -143,7 +143,7 @@ class Reactor(Fixture):
             # The thread should exit almost immediately, try to wait a bit, and
             # fail if it doesn't.
             self.thread.join(timeout=self.timeout)
-            if self.thread.isAlive():
+            if self.thread.is_alive():
                 raise RuntimeError("Could not stop the reactor thread")
 
         elif self.reactor.running:
