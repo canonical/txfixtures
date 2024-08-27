@@ -1,4 +1,4 @@
 fixtures
 testtools
-twisted<=22.10
+twisted
 psutil
