@@ -18,7 +18,12 @@
           - name: Set up PIP on Ubuntu
             run: sudo apt install -y python3-pip
           - name: Install dependencies
-            run: python3 -m pip install tox --break-system-packages
+            run: |
+            if [[ "${{ matrix.os }}" == "ubuntu-22.04" || "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
+              python3 -m pip install tox 
+            else
+              python3 -m pip install tox --break-system-packages
+            fi
           - name: Run unit tests (via tox)
             # Run tox using the version of Python in `PATH`
             run: tox -e py
