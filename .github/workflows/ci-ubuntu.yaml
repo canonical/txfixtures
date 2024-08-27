@@ -1,0 +1,24 @@
+---
+    name: CI for Ubuntu versions
+    on:
+      - push
+      - pull_request
+    jobs:
+      test:
+        name: Run unit tests
+        strategy:
+          matrix:
+            os: ["ubuntu-24.04", "ubuntu-22.04", "ubuntu-20.04"]
+        runs-on: ${{ matrix.os }}
+        steps:
+          - name: Checkout source code
+            uses: actions/checkout@v4
+            with:
+              fetch-depth: 0
+          - name: Set up PIP on Ubuntu
+            run: apt install python3-pip
+          - name: Install dependencies
+            run: python3 -m pip install tox
+          - name: Run unit tests (via tox)
+            # Run tox using the version of Python in `PATH`
+            run: tox -e py
