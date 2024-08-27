@@ -7,7 +7,7 @@ from six.moves.queue import Queue
 
 from fixtures import Fixture
 
-from twisted.internet.posixbase import _SIGCHLDWaker
+from twisted.internet._signals import _SIGCHLDWaker
 from twisted.internet.epollreactor import EPollReactor
 
 from txfixtures._twisted.threading import (
