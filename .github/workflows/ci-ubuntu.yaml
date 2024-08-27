@@ -16,9 +16,9 @@
             with:
               fetch-depth: 0
           - name: Set up PIP on Ubuntu
-            run: apt install python3-pip
+            run: sudo apt install -y python3-pip
           - name: Install dependencies
-            run: python3 -m pip install tox
+            run: python3 -m pip install tox --break-system-packages
           - name: Run unit tests (via tox)
             # Run tox using the version of Python in `PATH`
             run: tox -e py
