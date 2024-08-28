@@ -5,7 +5,7 @@ from fixtures import FakeLogger
 from systemfixtures import FakeThreads
 
 from twisted.internet.defer import succeed
-from twisted.internet.posixbase import _SIGCHLDWaker
+from twisted.internet._signals import _SIGCHLDWaker
 
 from txfixtures._twisted.testing import ThreadedMemoryReactorClock
 
