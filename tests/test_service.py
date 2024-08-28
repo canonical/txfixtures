@@ -55,8 +55,7 @@ class ServiceIntegrationTest(TestCase):
         self.fixture.command = b"/foobar"
         self.fixture.protocol.minUptime = 2.5
         error = self.assertRaises(MultipleExceptions, self.fixture.setUp)
-        self.assertIsInstance(error.args[0][1], ProcessTerminated)
-        self.assertIn("No such file or directory", self.logger.output)
+        self.assertIsInstance(error.args[0][1], FileNotFoundError)
 
     def test_non_executable_command(self):
         """If the given command is not executable, setUp raises an error."""
@@ -66,7 +65,7 @@ class ServiceIntegrationTest(TestCase):
         self.fixture.command = path.encode("utf-8")
         self.fixture.protocol.minUptime = 2.5
         error = self.assertRaises(MultipleExceptions, self.fixture.setUp)
-        self.assertIsInstance(error.args[0][1], ProcessTerminated)
+        self.assertIsInstance(error.args[0][1], PermissionError)
 
     def test_hung(self):
         """
@@ -157,10 +156,10 @@ class ServiceProtocolIntegrationTest(TestCase):
     @inlineCallbacks
     def test_no_min_uptime(self):
         """If the service doesn't stay up for minUpTime, an error is raised."""
-        # Spawn a non-existing process, which will make os.execvp fail,
-        # triggering ServiceProtocol.processExited almost immediately.
+        # Exit the FakeExecutable fixture as soon as it starts
+        self.script.line('exit(1)')
         self.process = reactor.spawnProcess(
-            self.protocol, b"/foo/bar", [b"/foo/bar"])
+            self.protocol, self.script.path, [self.script.path])
         try:
             yield self.protocol.ready
         except ProcessTerminated as error:
@@ -168,7 +167,7 @@ class ServiceProtocolIntegrationTest(TestCase):
         else:
             self.fail(
                 "The 'ready' deferred did not errback, while we were expecting"
-                "an error, due to the process not staying up for at least 0.1"
+                " an error, due to the process not staying up for at least 0.1"
                 "seconds")
 
     @inlineCallbacks
