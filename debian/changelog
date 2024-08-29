@@ -2,16 +2,23 @@ txfixtures (0.5.1-1) unstable; urgency=medium
 
   * New upstream version 0.5.1
 
+  [ Tushar Gupta ]
   * Make txfixtures compatible with twisted 24.x
   * Deprecate using thread.isAlive
-  * Drop support for python < 3.8  
+  * Drop support for python < 3.8
+  
+  [ Jürgen Gmach ]
   * Temporarily comment out timezone dependent test
   * Add basic GHA configuration
   * Remove obsolete travis configuration
+
+  [ Jelmer Vernooĳ ]
   * txfixtures is compatible with up to twisted version 22.10
   * Restrict maximum supported Twisted version
   * Remove unused code
   * Remove phantom.js fixture
+
+  [ Colin Watson ]
   * Remove support for MongoDB
   * Update obsolete tox configuration
   * Fix mongodb cleanup ordering

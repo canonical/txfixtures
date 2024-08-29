@@ -1,6 +1,6 @@
 Source: txfixtures
-Maintainer: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
-Uploaders: Free Ekanayaka <freee@debian.org>
+Maintainer: Launchpad Engineering Team <launchpad-dev@lists.launchpad.net>
+Uploaders: Tushar Gupta <tushar.gupta@canonical.com>
 Section: python
 Priority: optional
 Build-Depends: dh-python,
@@ -16,8 +16,8 @@ Build-Depends: dh-python,
 	       procps,
 Standards-Version: 3.9.8
 Homepage: https://launchpad.net/txfixtures
-Vcs-Browser: https://anonscm.debian.org/cgit/python-modules/packages/txfixtures.git
-Vcs-Git: git://anonscm.debian.org/python-modules/packages/txfixtures.git
+Vcs-Browser: https://github.com/canonical/txfixtures
+Vcs-Git: https://github.com/canonical/txfixtures.git
 
 Package: python3-txfixtures
 Architecture: all
