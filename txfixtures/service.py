@@ -406,16 +406,16 @@ class ServiceOutputParser(LineOnlyReceiver):
     #: example, this allows you to use "{Y}-{m}-{S}" as pattern snippet, as
     #  opposed to an explicit "(?P<Y>\d{4})-(?P<m>\d{2})-(?P<d>\d{2})".
     substitutions = {
-        "Y": "(?P<Y>\d{4})",
-        "m": "(?P<m>\d{2})",
-        "d": "(?P<d>\d{2})",
-        "H": "(?P<H>\d{2})",
-        "M": "(?P<M>\d{2})",
-        "S": "(?P<S>\d{2})",
-        "msecs": "(?P<msecs>\d{3})",
-        "levelname": "(?P<levelname>[a-zA-Z]+)",
-        "name": "(?P<name>.+)",
-        "message": "(?P<message>.+)",
+        "Y": r"(?P<Y>\d{4})",
+        "m": r"(?P<m>\d{2})",
+        "d": r"(?P<d>\d{2})",
+        "H": r"(?P<H>\d{2})",
+        "M": r"(?P<M>\d{2})",
+        "S": r"(?P<S>\d{2})",
+        "msecs": r"(?P<msecs>\d{3})",
+        "levelname": r"(?P<levelname>[a-zA-Z]+)",
+        "name": r"(?P<name>.+)",
+        "message": r"(?P<message>.+)",
     }
 
     #: A string identifying the service whose output is being

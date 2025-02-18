@@ -12,3 +12,4 @@ txfixtures.egg-info
 __pycache__
 .tox
 .coverage
+.eggs
