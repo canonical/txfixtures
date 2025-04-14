@@ -1,6 +1,6 @@
 import logging
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from logging.handlers import BufferingHandler
 
@@ -379,10 +379,12 @@ class ServiceOutputParserTest(TestCase):
         self.assertEqual("INFO", record.levelname)
         self.assertEqual("logger", record.name)
         self.assertEqual("hi", record.msg)
-        # todo: this assertion fails depending on the environment it is run on
-        # also see https://github.com/testing-cabal/txfixtures/pull/23
-        # self.assertEqual(1479110381, record.created)
-        # commented out to bootstrap GHA setup
+
+        expected_dt_utc = datetime(2016, 11, 14, 8, 59, 41, 0, tzinfo=timezone.utc)
+        expected_dt_local = expected_dt_utc.astimezone()
+        expected_timestamp_local = expected_dt_local.timestamp()
+        self.assertEqual(expected_timestamp_local, record.created)
+
         self.assertEqual(400, record.msecs)
         self.assertEqual("my-app", record.processName)
 
